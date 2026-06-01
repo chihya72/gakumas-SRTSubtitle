@@ -1,0 +1,71 @@
+name: Auto Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  update_srt:
+    if: github.repository == 'chihya72/gakumas-SRTSubtitle'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      revision: 0
+
+    steps:
+      - name: Checkout SRTSubtitle repository
+        uses: actions/checkout@v4
+        with:
+          path: main
+
+      - name: Get local revision if exists
+        if: ${{ hashFiles('main/revision') != '' }}
+        run: |
+          echo "revision=$(cat main/revision)" >> "$GITHUB_ENV"
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Checkout HatsuboshiToolkit srt branch
+        uses: actions/checkout@v4
+        with:
+          repository: chihya72/HatsuboshiToolkit
+          ref: srt
+          path: HatsuboshiToolkit
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+        working-directory: HatsuboshiToolkit
+
+      - name: Run script to check update
+        run: |
+          python main.py --mode srt --reset True --db_revision "$revision" --srt_output cache/SRTSubtitle --srt_bundle_cache cache/srt_bundles --srt_workers 12
+        working-directory: HatsuboshiToolkit
+
+      - name: Copy files to repository
+        run: |
+          if [ ! -f cache/revision ]; then
+            echo "No SRTSubtitle update found."
+            exit 0
+          fi
+          echo "revision=$(cat cache/revision)" >> "$GITHUB_ENV"
+          cp cache/revision ../main/revision
+          rm -rf ../main/SRTSubtitle
+          mkdir -p ../main/SRTSubtitle
+          if [ -d cache/SRTSubtitle ]; then
+            cp -r cache/SRTSubtitle/. ../main/SRTSubtitle/
+          fi
+        working-directory: HatsuboshiToolkit
+
+      - name: Commit update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update SRTSubtitle database revision to ${{ env.revision }}
+          repository: main
