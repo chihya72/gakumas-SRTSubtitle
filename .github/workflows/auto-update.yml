@@ -57,7 +57,6 @@ jobs:
           fi
           echo "revision=$(cat cache/revision)" >> "$GITHUB_ENV"
           cp cache/revision ../main/revision
-          rm -rf ../main/SRTSubtitle
           mkdir -p ../main/SRTSubtitle
           if [ -d cache/SRTSubtitle ]; then
             cp -r cache/SRTSubtitle/. ../main/SRTSubtitle/
