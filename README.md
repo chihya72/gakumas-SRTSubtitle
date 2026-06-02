@@ -11,29 +11,19 @@
 
 ## 文件格式
 
-歌词文件使用 Gakumas Localify 当前读取的 map 格式：
+歌词文件使用纯 map 格式：
 
 ```json
 {
-  "name": "srt_live_all-005",
-  "bundle": "tln_live_all-005",
-  "pathId": 8938,
-  "subtitles": {
-    "あれよという間に飲み込まれる\r\n": ""
-  }
+  "あれよという間に飲み込まれる\r\n": ""
 }
 ```
 
-翻译时请在 `translated/SRTSubtitle/` 下放置同名 JSON，并将 `subtitles` 中的 value 改为翻译后的文本。例如：
+翻译时请在 `translated/SRTSubtitle/` 下放置同名 JSON，并将 value 改为翻译后的文本。例如：
 
 ```json
 {
-  "name": "srt_live_all-005",
-  "bundle": "tln_live_all-005",
-  "pathId": 8938,
-  "subtitles": {
-    "あれよという間に飲み込まれる\r\n": "あれよという間に飲み込まれる\n不知何时早已被吞没\r\n"
-  }
+  "あれよという間に飲み込まれる\r\n": "あれよという間に飲み込まれる\n不知何时早已被吞没\r\n"
 }
 ```
 
