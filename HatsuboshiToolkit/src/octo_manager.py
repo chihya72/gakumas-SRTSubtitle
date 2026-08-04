@@ -19,6 +19,7 @@ class DataManger:
     _local_diff_path = os.path.join(_data_path, _local_diff_filename)
 
     def __init__(self):
+        Path(self._data_path).mkdir(parents=True, exist_ok=True)
         self.reset()
 
     def reset(self):
