@@ -51,12 +51,15 @@ local-files/SRTSubtitle/
 自动更新流程：
 
 1. 读取本仓库的 `revision`。
-2. checkout `chihya72/HatsuboshiToolkit` 的 `srt` 分支。
-3. 运行 HatsuboshiToolkit，从游戏 Octo API 查询 `revision` 之后的资源差分。
-4. 如果差分中包含 `tln_live*` 资源，就下载并解密对应 AssetBundle。
-5. 从资源中提取 `SRTSubtitle/*.json`。
-6. 将新提取的文件复制到本仓库的 `SRTSubtitle/`。
-7. 更新 `revision` 并自动提交。
+2. 使用本仓库内置的 `HatsuboshiToolkit/` 代码，不再 checkout 上游代码仓库。
+3. 探测更高的可用 Octo 版本，并自动更新 `HatsuboshiToolkit/config.ini`。
+4. 运行内置代码，从游戏 Octo API 查询 `revision` 之后的资源差分。
+5. 如果差分中包含 `tln_live*` 资源，就下载并解密对应 AssetBundle。
+6. 从资源中提取 `SRTSubtitle/*.json`。
+7. 将新提取的文件复制到本仓库的 `SRTSubtitle/`。
+8. 更新 `revision` 并自动提交。
+
+首次运行会使用当前配置建立完整本地清单；版本切换时也会自动从 `revision=0` 重建清单，之后继续使用增量版本号。版本探测按当前 API 的版本编号规则向后检查多个 `+100` 候选。
 
 如果本次 Octo 更新中没有新的 `tln_live*` 歌词资源，Actions 会正常结束，不会修改 `SRTSubtitle/`。
 

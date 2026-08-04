@@ -32,22 +32,25 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Checkout HatsuboshiToolkit srt branch
-        uses: actions/checkout@v4
-        with:
-          repository: chihya72/HatsuboshiToolkit
-          ref: srt
-          path: HatsuboshiToolkit
-
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-        working-directory: HatsuboshiToolkit
+        working-directory: main/HatsuboshiToolkit
+
+      - name: Detect latest Octo version
+        run: |
+          old_version=$(sed -n 's/^VERSION = //p' config.ini)
+          octo_version=$(python main.py --update_version)
+          echo "octo_version=$octo_version" >> "$GITHUB_ENV"
+          if [ "$old_version" != "$octo_version" ]; then
+            echo "revision=0" >> "$GITHUB_ENV"
+          fi
+        working-directory: main/HatsuboshiToolkit
 
       - name: Run script to check update
         run: |
           python main.py --mode srt --reset True --db_revision "$revision" --srt_output cache/SRTSubtitle --srt_bundle_cache cache/srt_bundles --srt_workers 12
-        working-directory: HatsuboshiToolkit
+        working-directory: main/HatsuboshiToolkit
 
       - name: Copy files to repository
         run: |
@@ -56,15 +59,15 @@ jobs:
             exit 0
           fi
           echo "revision=$(cat cache/revision)" >> "$GITHUB_ENV"
-          cp cache/revision ../main/revision
-          mkdir -p ../main/SRTSubtitle
+          cp cache/revision ../revision
+          mkdir -p ../SRTSubtitle
           if [ -d cache/SRTSubtitle ]; then
-            cp -r cache/SRTSubtitle/. ../main/SRTSubtitle/
+            cp -r cache/SRTSubtitle/. ../SRTSubtitle/
           fi
-        working-directory: HatsuboshiToolkit
+        working-directory: main/HatsuboshiToolkit
 
       - name: Commit update
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Update SRTSubtitle database revision to ${{ env.revision }}
+          commit_message: Update SRTSubtitle to Octo ${{ env.octo_version }}, revision ${{ env.revision }}
           repository: main
